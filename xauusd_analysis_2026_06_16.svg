@@ -1,227 +1,347 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="1400" height="900">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="buyZone" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#00c853;stop-opacity:0.15" />
-      <stop offset="100%" style="stop-color:#00c853;stop-opacity:0.05" />
-    </linearGradient>
-    <linearGradient id="slZone" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#ff1744;stop-opacity:0.15" />
-      <stop offset="100%" style="stop-color:#ff1744;stop-opacity:0.05" />
-    </linearGradient>
-    <linearGradient id="tp1Zone" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:0.1" />
-      <stop offset="100%" style="stop-color:#00e5ff;stop-opacity:0.05" />
-    </linearGradient>
-    <linearGradient id="tp2Zone" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#651fff;stop-opacity:0.1" />
-      <stop offset="100%" style="stop-color:#651fff;stop-opacity:0.05" />
+      <stop offset="0%" style="stop-color:#0f0f1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
     </linearGradient>
     <filter id="glow">
       <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-
   <!-- Background -->
-  <rect width="1200" height="800" fill="url(#bgGrad)"/>
+  <rect width="1400" height="900" fill="url(#bgGrad)"/>
 
-  <!-- Title Section -->
-  <text x="600" y="45" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="28" font-weight="bold">XAUUSD - Texnik Tahlil</text>
-  <text x="600" y="72" text-anchor="middle" fill="#aaaaaa" font-family="Arial, sans-serif" font-size="14">16 Iyun 2026 | 20:00 UTC-4 Sessiya Prognozi | 5M/1H/4H Timeframe</text>
 
-  <!-- Grid Lines -->
-  <g stroke="#2a2a4a" stroke-width="0.5" stroke-dasharray="4,4">
-    <line x1="100" y1="120" x2="1100" y2="120"/>
-    <line x1="100" y1="200" x2="1100" y2="200"/>
-    <line x1="100" y1="280" x2="1100" y2="280"/>
-    <line x1="100" y1="360" x2="1100" y2="360"/>
-    <line x1="100" y1="440" x2="1100" y2="440"/>
-    <line x1="100" y1="520" x2="1100" y2="520"/>
-    <line x1="100" y1="600" x2="1100" y2="600"/>
+  <!-- Header -->
+  <text x="30" y="28" fill="#888" font-family="Arial" font-size="11">hhshshsbahsv1 created with Kiro AI, Jun 16, 2026 15:08 UTC-4</text>
+  <text x="30" y="48" fill="#ccc" font-family="Arial" font-size="13">Gold Spot / U.S. Dollar · 5 · FOREX.com</text>
+  <text x="350" y="48" fill="#aaa" font-family="Arial" font-size="12">O:4,342.03  H:4,342.98  L:4,341.11  C:<tspan fill="#ff5252">4,341.34</tspan>  -0.69 (-0.02%)</text>
+  <text x="900" y="48" fill="#4caf50" font-family="Arial" font-size="12">+32.71 (+0.76%)</text>
+  <text x="1350" y="28" fill="#aaa" font-family="Arial" font-size="13" text-anchor="end">USD</text>
+
+  <!-- Chart Area Border -->
+  <rect x="60" y="60" width="1240" height="700" fill="none" stroke="#1e1e3a" stroke-width="1"/>
+
+  <!-- Price Grid Lines -->
+  <g stroke="#1a1a35" stroke-width="0.5">
+    <line x1="60" y1="110" x2="1300" y2="110"/>
+    <line x1="60" y1="195" x2="1300" y2="195"/>
+    <line x1="60" y1="280" x2="1300" y2="280"/>
+    <line x1="60" y1="365" x2="1300" y2="365"/>
+    <line x1="60" y1="450" x2="1300" y2="450"/>
+    <line x1="60" y1="535" x2="1300" y2="535"/>
+    <line x1="60" y1="620" x2="1300" y2="620"/>
+    <line x1="60" y1="700" x2="1300" y2="700"/>
   </g>
 
-  <!-- Price Scale (right side) -->
-  <text x="1120" y="125" fill="#888" font-family="Arial" font-size="11">4,390</text>
-  <text x="1120" y="205" fill="#888" font-family="Arial" font-size="11">4,370</text>
-  <text x="1120" y="285" fill="#888" font-family="Arial" font-size="11">4,360</text>
-  <text x="1120" y="365" fill="#888" font-family="Arial" font-size="11">4,340</text>
-  <text x="1120" y="445" fill="#888" font-family="Arial" font-size="11">4,330</text>
-  <text x="1120" y="525" fill="#888" font-family="Arial" font-size="11">4,320</text>
-  <text x="1120" y="605" fill="#888" font-family="Arial" font-size="11">4,310</text>
 
-  <!-- TP2 Zone -->
-  <rect x="100" y="100" width="1000" height="60" fill="url(#tp2Zone)" rx="2"/>
-  <line x1="100" y1="130" x2="1100" y2="130" stroke="#651fff" stroke-width="2" stroke-dasharray="8,4" filter="url(#glow)"/>
-  <rect x="105" y="105" width="120" height="22" fill="#651fff" rx="3" opacity="0.9"/>
-  <text x="165" y="120" text-anchor="middle" fill="#fff" font-family="Arial" font-size="11" font-weight="bold">TP2: $4,390</text>
+  <!-- Price Labels (right side) - Range $4,310 to $4,357 -->
+  <text x="1310" y="114" fill="#666" font-family="Arial" font-size="10">4,357.00</text>
+  <text x="1310" y="199" fill="#666" font-family="Arial" font-size="10">4,352.00</text>
+  <text x="1310" y="284" fill="#666" font-family="Arial" font-size="10">4,347.00</text>
+  <text x="1310" y="369" fill="#666" font-family="Arial" font-size="10">4,342.00</text>
+  <text x="1310" y="454" fill="#666" font-family="Arial" font-size="10">4,337.00</text>
+  <text x="1310" y="539" fill="#666" font-family="Arial" font-size="10">4,332.00</text>
+  <text x="1310" y="624" fill="#666" font-family="Arial" font-size="10">4,327.00</text>
+  <text x="1310" y="704" fill="#666" font-family="Arial" font-size="10">4,322.00</text>
 
-  <!-- TP1 Zone -->
-  <rect x="100" y="250" width="1000" height="50" fill="url(#tp1Zone)" rx="2"/>
-  <line x1="100" y1="280" x2="1100" y2="280" stroke="#00e5ff" stroke-width="2" stroke-dasharray="8,4" filter="url(#glow)"/>
-  <rect x="105" y="258" width="120" height="22" fill="#00e5ff" rx="3" opacity="0.9"/>
-  <text x="165" y="273" text-anchor="middle" fill="#000" font-family="Arial" font-size="11" font-weight="bold">TP1: $4,360</text>
+  <!-- Time Labels (bottom) -->
+  <text x="100" y="775" fill="#666" font-family="Arial" font-size="10">15:00</text>
+  <text x="250" y="775" fill="#666" font-family="Arial" font-size="10">15:30</text>
+  <text x="400" y="775" fill="#666" font-family="Arial" font-size="10">16:00</text>
+  <text x="550" y="775" fill="#666" font-family="Arial" font-size="10">16:30</text>
+  <text x="700" y="775" fill="#666" font-family="Arial" font-size="10">17:00</text>
+  <text x="850" y="775" fill="#666" font-family="Arial" font-size="10">18:00</text>
+  <text x="1000" y="775" fill="#666" font-family="Arial" font-size="10">19:00</text>
+  <text x="1150" y="775" fill="#666" font-family="Arial" font-size="10">20:00</text>
 
-  <!-- Current Price Line -->
-  <line x1="100" y1="360" x2="1100" y2="360" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="3,3"/>
-  <rect x="1050" y="350" width="95" height="20" fill="#ffd600" rx="3"/>
-  <text x="1097" y="364" text-anchor="middle" fill="#000" font-family="Arial" font-size="11" font-weight="bold">$4,339</text>
+  <!-- 15:00 Time Marker -->
+  <line x1="100" y1="60" x2="100" y2="760" stroke="#2196f3" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+  <rect x="70" y="758" width="60" height="18" fill="#2196f3" rx="3"/>
+  <text x="100" y="770" text-anchor="middle" fill="#fff" font-family="Arial" font-size="9" font-weight="bold">15:00</text>
 
-  <!-- Entry Zone (BUY) -->
-  <rect x="100" y="420" width="1000" height="60" fill="url(#buyZone)" rx="2"/>
-  <line x1="100" y1="440" x2="1100" y2="440" stroke="#00c853" stroke-width="2.5" filter="url(#glow)"/>
-  <rect x="105" y="422" width="160" height="22" fill="#00c853" rx="3" opacity="0.9"/>
-  <text x="185" y="437" text-anchor="middle" fill="#fff" font-family="Arial" font-size="11" font-weight="bold">BUY ENTRY: $4,325-4,330</text>
+  <!-- 20:00 Time Marker -->
+  <line x1="1150" y1="60" x2="1150" y2="760" stroke="#ff1744" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+  <rect x="1120" y="758" width="60" height="18" fill="#ff1744" rx="3"/>
+  <text x="1150" y="770" text-anchor="middle" fill="#fff" font-family="Arial" font-size="9" font-weight="bold">20:00</text>
 
-  <!-- Stop Loss Zone -->
-  <rect x="100" y="580" width="1000" height="40" fill="url(#slZone)" rx="2"/>
-  <line x1="100" y1="600" x2="1100" y2="600" stroke="#ff1744" stroke-width="2.5" filter="url(#glow)"/>
-  <rect x="105" y="582" width="130" height="22" fill="#ff1744" rx="3" opacity="0.9"/>
-  <text x="170" y="597" text-anchor="middle" fill="#fff" font-family="Arial" font-size="11" font-weight="bold">SL: $4,310</text>
 
-  <!-- Candlestick Pattern (simulated price action) -->
-  <!-- Past candles -->
-  <line x1="180" y1="500" x2="180" y2="540" stroke="#ff5252" stroke-width="1"/>
-  <rect x="176" y="510" width="8" height="20" fill="#ff5252"/>
+  <!-- CANDLESTICKS: 15:00 - 16:00 (Bearish start from $4,350 high) -->
+  <!-- Candle 1: 15:00 - Big green to high $4,350 -->
+  <line x1="105" y1="150" x2="105" y2="240" stroke="#26a69a" stroke-width="1"/>
+  <rect x="101" y="160" width="8" height="60" fill="#26a69a"/>
 
-  <line x1="200" y1="490" x2="200" y2="530" stroke="#ff5252" stroke-width="1"/>
-  <rect x="196" y="500" width="8" height="22" fill="#ff5252"/>
+  <!-- Candle 2: 15:05 - small green -->
+  <line x1="120" y1="130" x2="120" y2="195" stroke="#26a69a" stroke-width="1"/>
+  <rect x="116" y="140" width="8" height="40" fill="#26a69a"/>
 
-  <line x1="220" y1="510" x2="220" y2="545" stroke="#ff5252" stroke-width="1"/>
-  <rect x="216" y="515" width="8" height="25" fill="#ff5252"/>
+  <!-- Candle 3: 15:10 - High of day $4,350+ -->
+  <line x1="135" y1="105" x2="135" y2="170" stroke="#26a69a" stroke-width="1"/>
+  <rect x="131" y="115" width="8" height="40" fill="#26a69a"/>
 
-  <line x1="240" y1="520" x2="240" y2="560" stroke="#ff5252" stroke-width="1"/>
-  <rect x="236" y="530" width="8" height="22" fill="#ff5252"/>
+  <!-- Candle 4: 15:15 - Rejection candle (doji/shooting star) -->
+  <line x1="150" y1="100" x2="150" y2="175" stroke="#ef5350" stroke-width="1"/>
+  <rect x="146" y="140" width="8" height="25" fill="#ef5350"/>
 
-  <!-- Bottom / reversal candles -->
-  <line x1="260" y1="540" x2="260" y2="580" stroke="#ff5252" stroke-width="1"/>
-  <rect x="256" y="555" width="8" height="18" fill="#ff5252"/>
+  <!-- Candle 5: 15:20 - Start of drop -->
+  <line x1="165" y1="145" x2="165" y2="210" stroke="#ef5350" stroke-width="1"/>
+  <rect x="161" y="155" width="8" height="40" fill="#ef5350"/>
 
-  <line x1="280" y1="550" x2="280" y2="590" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="276" y="555" width="8" height="20" fill="#69f0ae"/>
+  <!-- Candle 6: 15:25 -->
+  <line x1="180" y1="180" x2="180" y2="250" stroke="#ef5350" stroke-width="1"/>
+  <rect x="176" y="190" width="8" height="45" fill="#ef5350"/>
 
-  <line x1="300" y1="530" x2="300" y2="570" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="296" y="535" width="8" height="25" fill="#69f0ae"/>
+  <!-- Candle 7: 15:30 -->
+  <line x1="195" y1="225" x2="195" y2="290" stroke="#ef5350" stroke-width="1"/>
+  <rect x="191" y="235" width="8" height="40" fill="#ef5350"/>
 
-  <!-- Recovery candles -->
-  <line x1="320" y1="500" x2="320" y2="545" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="316" y="505" width="8" height="30" fill="#69f0ae"/>
+  <!-- Candle 8: 15:35 small bounce -->
+  <line x1="210" y1="260" x2="210" y2="310" stroke="#26a69a" stroke-width="1"/>
+  <rect x="206" y="270" width="8" height="30" fill="#26a69a"/>
 
-  <line x1="340" y1="470" x2="340" y2="510" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="336" y="475" width="8" height="28" fill="#69f0ae"/>
+  <!-- Candle 9: 15:40 -->
+  <line x1="225" y1="250" x2="225" y2="300" stroke="#ef5350" stroke-width="1"/>
+  <rect x="221" y="260" width="8" height="28" fill="#ef5350"/>
 
-  <line x1="360" y1="450" x2="360" y2="490" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="356" y="455" width="8" height="25" fill="#69f0ae"/>
+  <!-- Candle 10: 15:45 -->
+  <line x1="240" y1="275" x2="240" y2="330" stroke="#ef5350" stroke-width="1"/>
+  <rect x="236" y="285" width="8" height="32" fill="#ef5350"/>
 
-  <line x1="380" y1="430" x2="380" y2="470" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="376" y="435" width="8" height="28" fill="#69f0ae"/>
+  <!-- Candle 11: 15:50 -->
+  <line x1="255" y1="300" x2="255" y2="360" stroke="#26a69a" stroke-width="1"/>
+  <rect x="251" y="315" width="8" height="30" fill="#26a69a"/>
 
-  <line x1="400" y1="415" x2="400" y2="450" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="396" y="420" width="8" height="22" fill="#69f0ae"/>
+  <!-- Candle 12: 15:55 -->
+  <line x1="270" y1="290" x2="270" y2="340" stroke="#ef5350" stroke-width="1"/>
+  <rect x="266" y="300" width="8" height="28" fill="#ef5350"/>
 
-  <!-- Consolidation candles near current price -->
-  <line x1="420" y1="380" x2="420" y2="415" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="416" y="385" width="8" height="20" fill="#69f0ae"/>
 
-  <line x1="440" y1="370" x2="440" y2="400" stroke="#ff5252" stroke-width="1"/>
-  <rect x="436" y="375" width="8" height="18" fill="#ff5252"/>
+  <!-- CANDLESTICKS: 16:00 - 17:00 (Consolidation / slight bearish) -->
+  <!-- Candle 13-24: ranging $4,337-4,345 -->
+  <line x1="290" y1="310" x2="290" y2="370" stroke="#26a69a" stroke-width="1"/>
+  <rect x="286" y="320" width="8" height="35" fill="#26a69a"/>
 
-  <line x1="460" y1="365" x2="460" y2="395" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="456" y="370" width="8" height="18" fill="#69f0ae"/>
+  <line x1="310" y1="300" x2="310" y2="350" stroke="#26a69a" stroke-width="1"/>
+  <rect x="306" y="310" width="8" height="28" fill="#26a69a"/>
 
-  <line x1="480" y1="350" x2="480" y2="385" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="476" y="355" width="8" height="22" fill="#69f0ae"/>
+  <line x1="330" y1="280" x2="330" y2="330" stroke="#ef5350" stroke-width="1"/>
+  <rect x="326" y="290" width="8" height="25" fill="#ef5350"/>
 
-  <line x1="500" y1="345" x2="500" y2="380" stroke="#ff5252" stroke-width="1"/>
-  <rect x="496" y="350" width="8" height="20" fill="#ff5252"/>
+  <line x1="350" y1="295" x2="350" y2="350" stroke="#ef5350" stroke-width="1"/>
+  <rect x="346" y="310" width="8" height="28" fill="#ef5350"/>
 
-  <line x1="520" y1="340" x2="520" y2="375" stroke="#ff5252" stroke-width="1"/>
-  <rect x="516" y="348" width="8" height="18" fill="#ff5252"/>
+  <line x1="370" y1="320" x2="370" y2="375" stroke="#26a69a" stroke-width="1"/>
+  <rect x="366" y="335" width="8" height="25" fill="#26a69a"/>
 
-  <line x1="540" y1="345" x2="540" y2="380" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="536" y="350" width="8" height="20" fill="#69f0ae"/>
+  <line x1="390" y1="310" x2="390" y2="360" stroke="#26a69a" stroke-width="1"/>
+  <rect x="386" y="315" width="8" height="30" fill="#26a69a"/>
 
-  <line x1="560" y1="348" x2="560" y2="378" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="556" y="352" width="8" height="18" fill="#69f0ae"/>
+  <line x1="410" y1="295" x2="410" y2="345" stroke="#ef5350" stroke-width="1"/>
+  <rect x="406" y="300" width="8" height="30" fill="#ef5350"/>
 
-  <line x1="580" y1="350" x2="580" y2="380" stroke="#ff5252" stroke-width="1"/>
-  <rect x="576" y="355" width="8" height="18" fill="#ff5252"/>
+  <line x1="430" y1="315" x2="430" y2="365" stroke="#ef5350" stroke-width="1"/>
+  <rect x="426" y="325" width="8" height="28" fill="#ef5350"/>
 
-  <line x1="600" y1="352" x2="600" y2="382" stroke="#ff5252" stroke-width="1"/>
-  <rect x="596" y="358" width="8" height="16" fill="#ff5252"/>
+  <line x1="450" y1="330" x2="450" y2="380" stroke="#26a69a" stroke-width="1"/>
+  <rect x="446" y="340" width="8" height="25" fill="#26a69a"/>
 
-  <line x1="620" y1="355" x2="620" y2="380" stroke="#69f0ae" stroke-width="1"/>
-  <rect x="616" y="358" width="8" height="15" fill="#69f0ae"/>
+  <line x1="470" y1="320" x2="470" y2="365" stroke="#26a69a" stroke-width="1"/>
+  <rect x="466" y="330" width="8" height="22" fill="#26a69a"/>
 
-  <!-- Current candle -->
-  <line x1="640" y1="348" x2="640" y2="375" stroke="#ffd600" stroke-width="1.5"/>
-  <rect x="635" y="352" width="10" height="16" fill="#ffd600" stroke="#ffd600" stroke-width="1"/>
+  <line x1="490" y1="305" x2="490" y2="350" stroke="#ef5350" stroke-width="1"/>
+  <rect x="486" y="315" width="8" height="22" fill="#ef5350"/>
 
-  <!-- Future projected move (dashed arrow) -->
-  <path d="M 660 360 Q 700 380 720 440 Q 740 450 760 440 Q 800 400 850 350 Q 900 300 950 280 Q 1000 250 1050 130" 
-        stroke="#00e5ff" stroke-width="2" stroke-dasharray="6,4" fill="none" opacity="0.7"/>
+  <line x1="510" y1="325" x2="510" y2="370" stroke="#ef5350" stroke-width="1"/>
+  <rect x="506" y="335" width="8" height="22" fill="#ef5350"/>
 
-  <!-- Arrow at projected path -->
-  <polygon points="1050,125 1042,140 1058,140" fill="#00e5ff" opacity="0.8"/>
 
-  <!-- Pullback annotation -->
-  <circle cx="720" cy="440" r="12" fill="none" stroke="#00c853" stroke-width="2" stroke-dasharray="3,2"/>
-  <text x="720" y="465" text-anchor="middle" fill="#00c853" font-family="Arial" font-size="10" font-weight="bold">KIRISH</text>
+  <!-- CANDLESTICKS: 17:00 - 18:00 (Drop to $4,322 low) -->
+  <line x1="540" y1="340" x2="540" y2="400" stroke="#ef5350" stroke-width="1"/>
+  <rect x="536" y="350" width="8" height="35" fill="#ef5350"/>
 
-  <!-- Support line -->
-  <line x1="100" y1="520" x2="700" y2="520" stroke="#4fc3f7" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
-  <text x="105" y="515" fill="#4fc3f7" font-family="Arial" font-size="10">Support: $4,318-4,320</text>
+  <line x1="560" y1="375" x2="560" y2="440" stroke="#ef5350" stroke-width="1"/>
+  <rect x="556" y="385" width="8" height="40" fill="#ef5350"/>
 
-  <!-- Resistance line -->
-  <line x1="400" y1="310" x2="800" y2="310" stroke="#ff8a80" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
-  <text x="405" y="305" fill="#ff8a80" font-family="Arial" font-size="10">Resistance: $4,350-4,357</text>
+  <line x1="580" y1="420" x2="580" y2="490" stroke="#ef5350" stroke-width="1"/>
+  <rect x="576" y="430" width="8" height="45" fill="#ef5350"/>
 
-  <!-- Time labels -->
-  <text x="200" y="640" fill="#666" font-family="Arial" font-size="10">10:00</text>
-  <text x="350" y="640" fill="#666" font-family="Arial" font-size="10">12:00</text>
-  <text x="500" y="640" fill="#666" font-family="Arial" font-size="10">14:00</text>
-  <text x="640" y="640" fill="#ffd600" font-family="Arial" font-size="10" font-weight="bold">15:00 (Hozir)</text>
-  <text x="800" y="640" fill="#00e5ff" font-family="Arial" font-size="10">18:00</text>
-  <text x="950" y="640" fill="#00e5ff" font-family="Arial" font-size="10" font-weight="bold">20:00 (Target)</text>
+  <line x1="600" y1="465" x2="600" y2="540" stroke="#ef5350" stroke-width="1"/>
+  <rect x="596" y="480" width="8" height="42" fill="#ef5350"/>
 
-  <!-- Vertical time marker for 20:00 -->
-  <line x1="970" y1="100" x2="970" y2="625" stroke="#00e5ff" stroke-width="1" stroke-dasharray="3,5" opacity="0.4"/>
+  <line x1="620" y1="510" x2="620" y2="580" stroke="#ef5350" stroke-width="1"/>
+  <rect x="616" y="525" width="8" height="38" fill="#ef5350"/>
 
-  <!-- Info Panel (bottom section) -->
-  <rect x="100" y="665" width="1000" height="120" fill="#0d1b2a" rx="8" stroke="#2a3a5a" stroke-width="1"/>
+  <line x1="640" y1="555" x2="640" y2="620" stroke="#ef5350" stroke-width="1"/>
+  <rect x="636" y="565" width="8" height="40" fill="#ef5350"/>
 
-  <!-- Trade Setup Details -->
-  <text x="130" y="692" fill="#ffffff" font-family="Arial" font-size="16" font-weight="bold">SAVDO REJASI - 20:00 UTC-4</text>
+  <line x1="660" y1="590" x2="660" y2="660" stroke="#ef5350" stroke-width="1"/>
+  <rect x="656" y="605" width="8" height="38" fill="#ef5350"/>
 
-  <!-- Buy Setup -->
-  <rect x="130" y="705" width="12" height="12" fill="#00c853" rx="2"/>
-  <text x="150" y="716" fill="#ccc" font-family="Arial" font-size="13">Yo'nalish: <tspan fill="#00c853" font-weight="bold">BUY (Xarid)</tspan></text>
+  <!-- Low point ~$4,322 -->
+  <line x1="680" y1="640" x2="680" y2="710" stroke="#ef5350" stroke-width="1"/>
+  <rect x="676" y="660" width="8" height="35" fill="#ef5350"/>
 
-  <rect x="130" y="728" width="12" height="12" fill="#00c853" rx="2"/>
-  <text x="150" y="739" fill="#ccc" font-family="Arial" font-size="13">Kirish: <tspan fill="#00c853" font-weight="bold">$4,325 - $4,330</tspan> (pullback kutiladi)</text>
+  <line x1="700" y1="670" x2="700" y2="720" stroke="#ef5350" stroke-width="1"/>
+  <rect x="696" y="680" width="8" height="28" fill="#ef5350"/>
 
-  <rect x="130" y="751" width="12" height="12" fill="#ff1744" rx="2"/>
-  <text x="150" y="762" fill="#ccc" font-family="Arial" font-size="13">Stop Loss: <tspan fill="#ff1744" font-weight="bold">$4,310</tspan> (-15 to -20 pips)</text>
+  <!-- Bottom doji - reversal signal -->
+  <line x1="720" y1="690" x2="720" y2="730" stroke="#26a69a" stroke-width="1"/>
+  <rect x="716" y="700" width="8" height="10" fill="#26a69a"/>
 
-  <!-- TP Section -->
-  <rect x="550" y="705" width="12" height="12" fill="#00e5ff" rx="2"/>
-  <text x="570" y="716" fill="#ccc" font-family="Arial" font-size="13">TP1: <tspan fill="#00e5ff" font-weight="bold">$4,360</tspan> (+30 pips) | R:R = 1:2</text>
 
-  <rect x="550" y="728" width="12" height="12" fill="#651fff" rx="2"/>
-  <text x="570" y="739" fill="#ccc" font-family="Arial" font-size="13">TP2: <tspan fill="#651fff" font-weight="bold">$4,390</tspan> (+60 pips) | R:R = 1:3.5</text>
+  <!-- CANDLESTICKS: 18:00 - 19:00 (Recovery bounce from $4,322) -->
+  <line x1="745" y1="660" x2="745" y2="710" stroke="#26a69a" stroke-width="1"/>
+  <rect x="741" y="670" width="8" height="28" fill="#26a69a"/>
 
-  <rect x="550" y="751" width="12" height="12" fill="#ffd600" rx="2"/>
-  <text x="570" y="762" fill="#ccc" font-family="Arial" font-size="13">Sabab: <tspan fill="#ffd600">V-recovery + Iran deal = bullish momentum</tspan></text>
+  <line x1="765" y1="630" x2="765" y2="680" stroke="#26a69a" stroke-width="1"/>
+  <rect x="761" y="640" width="8" height="30" fill="#26a69a"/>
+
+  <line x1="785" y1="590" x2="785" y2="650" stroke="#26a69a" stroke-width="1"/>
+  <rect x="781" y="600" width="8" height="35" fill="#26a69a"/>
+
+  <line x1="805" y1="550" x2="805" y2="610" stroke="#26a69a" stroke-width="1"/>
+  <rect x="801" y="560" width="8" height="35" fill="#26a69a"/>
+
+  <line x1="825" y1="510" x2="825" y2="570" stroke="#26a69a" stroke-width="1"/>
+  <rect x="821" y="520" width="8" height="35" fill="#26a69a"/>
+
+  <line x1="845" y1="470" x2="845" y2="530" stroke="#26a69a" stroke-width="1"/>
+  <rect x="841" y="480" width="8" height="35" fill="#26a69a"/>
+
+  <line x1="865" y1="440" x2="865" y2="500" stroke="#ef5350" stroke-width="1"/>
+  <rect x="861" y="450" width="8" height="32" fill="#ef5350"/>
+
+  <line x1="885" y1="455" x2="885" y2="510" stroke="#ef5350" stroke-width="1"/>
+  <rect x="881" y="465" width="8" height="30" fill="#ef5350"/>
+
+  <line x1="905" y1="430" x2="905" y2="480" stroke="#26a69a" stroke-width="1"/>
+  <rect x="901" y="440" width="8" height="28" fill="#26a69a"/>
+
+  <line x1="925" y1="400" x2="925" y2="450" stroke="#26a69a" stroke-width="1"/>
+  <rect x="921" y="410" width="8" height="28" fill="#26a69a"/>
+
+
+  <!-- CANDLESTICKS: 19:00 - 19:30 (Struggle at $4,340, pullback then push) -->
+  <line x1="945" y1="370" x2="945" y2="420" stroke="#ef5350" stroke-width="1"/>
+  <rect x="941" y="380" width="8" height="28" fill="#ef5350"/>
+
+  <line x1="965" y1="385" x2="965" y2="430" stroke="#ef5350" stroke-width="1"/>
+  <rect x="961" y="395" width="8" height="22" fill="#ef5350"/>
+
+  <line x1="985" y1="400" x2="985" y2="460" stroke="#ef5350" stroke-width="1"/>
+  <rect x="981" y="410" width="8" height="35" fill="#ef5350"/>
+
+  <line x1="1005" y1="430" x2="1005" y2="490" stroke="#ef5350" stroke-width="1"/>
+  <rect x="1001" y="445" width="8" height="30" fill="#ef5350"/>
+
+  <line x1="1025" y1="460" x2="1025" y2="520" stroke="#26a69a" stroke-width="1"/>
+  <rect x="1021" y="470" width="8" height="32" fill="#26a69a"/>
+
+  <line x1="1045" y1="430" x2="1045" y2="490" stroke="#26a69a" stroke-width="1"/>
+  <rect x="1041" y="440" width="8" height="35" fill="#26a69a"/>
+
+  <!-- 19:30 - 20:00 area: Final push up -->
+  <line x1="1065" y1="390" x2="1065" y2="450" stroke="#26a69a" stroke-width="1"/>
+  <rect x="1061" y="400" width="8" height="35" fill="#26a69a"/>
+
+  <line x1="1085" y1="360" x2="1085" y2="420" stroke="#26a69a" stroke-width="1"/>
+  <rect x="1081" y="370" width="8" height="35" fill="#26a69a"/>
+
+  <line x1="1105" y1="340" x2="1105" y2="390" stroke="#ef5350" stroke-width="1"/>
+  <rect x="1101" y="350" width="8" height="28" fill="#ef5350"/>
+
+  <line x1="1125" y1="350" x2="1125" y2="400" stroke="#26a69a" stroke-width="1"/>
+  <rect x="1121" y="360" width="8" height="25" fill="#26a69a"/>
+
+  <!-- Current candle at 20:00 -->
+  <line x1="1150" y1="345" x2="1150" y2="395" stroke="#ffd600" stroke-width="1.5"/>
+  <rect x="1145" y="355" width="10" height="28" fill="#ffd600" stroke="#fff" stroke-width="0.5" opacity="0.9"/>
+
+
+  <!-- Moving Average Line (descending) -->
+  <polyline points="105,180 135,160 180,210 225,260 270,300 330,310 390,320 450,340 510,350 560,380 620,440 680,510 720,560 765,530 825,480 885,450 945,420 1005,430 1065,400 1125,380 1150,370"
+    stroke="#ffab40" stroke-width="1.5" fill="none" opacity="0.7"/>
+
+  <!-- Descending trendline (lower highs) -->
+  <line x1="135" y1="105" x2="1150" y2="340" stroke="#ff5252" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.8"/>
+  <text x="600" y="190" fill="#ff5252" font-family="Arial" font-size="11" transform="rotate(9,600,190)">Descending Resistance</text>
+
+  <!-- Support level $4,322 -->
+  <line x1="60" y1="700" x2="1300" y2="700" stroke="#4caf50" stroke-width="1" stroke-dasharray="4,4" opacity="0.6"/>
+  <text x="70" y="718" fill="#4caf50" font-family="Arial" font-size="10">Support: $4,322</text>
+
+  <!-- Resistance $4,350 -->
+  <line x1="60" y1="150" x2="1300" y2="150" stroke="#ff5252" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>
+  <text x="70" y="145" fill="#ff5252" font-family="Arial" font-size="10">Resistance: $4,350</text>
+
+  <!-- Current Price horizontal line -->
+  <line x1="60" y1="365" x2="1300" y2="365" stroke="#ffd600" stroke-width="0.8" stroke-dasharray="2,3" opacity="0.5"/>
+  <rect x="1270" y="356" width="80" height="18" fill="#ff5252" rx="3"/>
+  <text x="1310" y="369" text-anchor="middle" fill="#fff" font-family="Arial" font-size="10" font-weight="bold">4,341.34</text>
+
+
+  <!-- TRADE ANNOTATION: Entry Arrow -->
+  <circle cx="720" cy="700" r="8" fill="none" stroke="#4caf50" stroke-width="2" filter="url(#glow)"/>
+  <text x="720" y="740" text-anchor="middle" fill="#4caf50" font-family="Arial" font-size="10" font-weight="bold">BUY ZONE</text>
+
+  <!-- Arrow showing projected move from entry -->
+  <path d="M 730 690 Q 800 600 900 430 Q 950 380 1050 360" stroke="#4caf50" stroke-width="2" stroke-dasharray="5,3" fill="none" opacity="0.8" filter="url(#softGlow)"/>
+  <polygon points="1050,355 1040,365 1050,370" fill="#4caf50" opacity="0.8"/>
+
+  <!-- TP and SL annotations on right side -->
+  <!-- TP2 line -->
+  <line x1="1170" y1="195" x2="1280" y2="195" stroke="#651fff" stroke-width="2" filter="url(#softGlow)"/>
+  <rect x="1200" y="182" width="80" height="18" fill="#651fff" rx="3" opacity="0.9"/>
+  <text x="1240" y="195" text-anchor="middle" fill="#fff" font-family="Arial" font-size="9" font-weight="bold">TP2: $4,352</text>
+
+  <!-- TP1 line -->
+  <line x1="1170" y1="280" x2="1280" y2="280" stroke="#00e5ff" stroke-width="2" filter="url(#softGlow)"/>
+  <rect x="1200" y="267" width="80" height="18" fill="#00e5ff" rx="3" opacity="0.9"/>
+  <text x="1240" y="280" text-anchor="middle" fill="#000" font-family="Arial" font-size="9" font-weight="bold">TP1: $4,347</text>
+
+  <!-- Entry line -->
+  <line x1="1170" y1="620" x2="1280" y2="620" stroke="#4caf50" stroke-width="2" filter="url(#softGlow)"/>
+  <rect x="1195" y="607" width="90" height="18" fill="#4caf50" rx="3" opacity="0.9"/>
+  <text x="1240" y="620" text-anchor="middle" fill="#fff" font-family="Arial" font-size="9" font-weight="bold">ENTRY: $4,327</text>
+
+  <!-- SL line -->
+  <line x1="1170" y1="730" x2="1280" y2="730" stroke="#ff1744" stroke-width="2" filter="url(#softGlow)"/>
+  <rect x="1200" y="717" width="80" height="18" fill="#ff1744" rx="3" opacity="0.9"/>
+  <text x="1240" y="730" text-anchor="middle" fill="#fff" font-family="Arial" font-size="9" font-weight="bold">SL: $4,315</text>
+
+
+  <!-- R:R Box -->
+  <rect x="1180" y="625" width="120" height="90" fill="#0d1b2a" rx="5" stroke="#2a3a5a" stroke-width="1"/>
+  <text x="1240" y="644" text-anchor="middle" fill="#aaa" font-family="Arial" font-size="9">Risk: 12 pips</text>
+  <text x="1240" y="660" text-anchor="middle" fill="#00e5ff" font-family="Arial" font-size="9">TP1: +20 pips (1:1.7)</text>
+  <text x="1240" y="676" text-anchor="middle" fill="#651fff" font-family="Arial" font-size="9">TP2: +25 pips (1:2)</text>
+  <text x="1240" y="698" text-anchor="middle" fill="#ffd600" font-family="Arial" font-size="10" font-weight="bold">R:R = 1:2</text>
+
+  <!-- Pattern annotation: descending triangle / wedge -->
+  <text x="400" y="90" fill="#ff8a80" font-family="Arial" font-size="13" font-weight="bold">Descending Structure (Lower Highs)</text>
+  <text x="400" y="108" fill="#aaa" font-family="Arial" font-size="11">15:00 High: $4,350 → 18:00 Low: $4,322 → Recovery to $4,341</text>
+
+  <!-- Analysis Panel at Bottom -->
+  <rect x="60" y="790" width="1240" height="100" fill="#0d1b2a" rx="6" stroke="#2a3a5a" stroke-width="1"/>
+
+  <text x="90" y="815" fill="#fff" font-family="Arial" font-size="14" font-weight="bold">MENING TAHLILIM — 15:00 → 20:00 Oralig'i</text>
+
+  <text x="90" y="838" fill="#ccc" font-family="Arial" font-size="11">1. 15:00 da $4,350 ga yetdi (kun High), keyin kuchli SELL bosimi — descending structure hosil bo'ldi</text>
+  <text x="90" y="856" fill="#ccc" font-family="Arial" font-size="11">2. 18:00 da $4,322 ga tushdi (kun Low) — BU YERDA BUYERS KIRDI, strong V-bounce</text>
+  <text x="90" y="874" fill="#ccc" font-family="Arial" font-size="11">3. 20:00 ga PROGNOZ: Narx $4,340-4,347 oralig'ida CONSOLIDATION qiladi yoki $4,347 ni sinab ko'radi</text>
+
+  <!-- Verdict -->
+  <rect x="900" y="800" width="380" height="35" fill="#1b5e20" rx="5" opacity="0.8"/>
+  <text x="1090" y="822" text-anchor="middle" fill="#69f0ae" font-family="Arial" font-size="13" font-weight="bold">FIKRIM: RANGE / SLIGHT BULLISH</text>
 
   <!-- Risk Warning -->
-  <text x="600" y="782" text-anchor="middle" fill="#ff8a80" font-family="Arial" font-size="10" font-style="italic">* Bu moliyaviy maslahat EMAS. Faqat texnik tahlil. O'z risking bilan savdo qiling. *</text>
+  <text x="670" y="885" text-anchor="middle" fill="#ff8a80" font-family="Arial" font-size="9" font-style="italic">* Bu moliyaviy maslahat EMAS. Faqat texnik tahlil asosida shaxsiy fikr. Risk o'zingizda! *</text>
 
   <!-- Watermark -->
-  <text x="1090" y="790" text-anchor="end" fill="#333" font-family="Arial" font-size="9">Kiro AI Analysis | agzamprop/Forex</text>
+  <text x="1280" y="895" text-anchor="end" fill="#333" font-family="Arial" font-size="8">Kiro AI | agzamprop/Forex | 16-Jun-2026</text>
 </svg>
