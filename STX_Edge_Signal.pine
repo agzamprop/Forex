@@ -30,6 +30,9 @@ grpSignal = 'Signal Settings'
 slPips      = input.float(5.0, 'Stop Loss ($)', step=0.5, group=grpSignal)
 tpPips      = input.float(20.0, 'Take Profit ($)', step=1.0, group=grpSignal)
 minBodyATR  = input.float(0.3, 'Min Rejection Body (x ATR)', step=0.1, group=grpSignal, tooltip='Rejection candle min kuchi')
+maxDailySignals = input.int(2, 'Max signals per day', minval=1, maxval=5, group=grpSignal)
+cooldownBars = input.int(20, 'Cooldown after SL (bars)', minval=5, maxval=50, group=grpSignal, tooltip='SL dan keyin necha bar kutish')
+minPullbackATR = input.float(1.0, 'Min Pullback Distance (x ATR)', step=0.1, group=grpSignal, tooltip='Narx EMA dan kamida shu qadar uzoqlashgan bolishi kerak')
 
 grpSession = 'Session Settings'
 londonStart = input.int(3, 'London Start (UTC)', minval=0, maxval=23, group=grpSession)
@@ -269,11 +272,37 @@ if inTrade
 //-----------------------------------------------------------------------------}
 // SIGNAL GENERATION — Mening haqiqiy tahlilim
 //-----------------------------------------------------------------------------{
-// BUY: Trend BUY + Pullback + Rejection + Momentum + No Counter Trend
-bool buySignal = finalTrend == 1 and isPullbackBuy and bullRejection and momentumBuy and noCounterTrendBuy and not inTrade and inSession
+// Daily signal counter
+var int dailySignals = 0
+var int lastDay = 0
+int today = dayofweek
+if today != lastDay
+    dailySignals := 0
+    lastDay := today
 
-// SELL: Trend SELL + Pullback + Rejection + Momentum + No Counter Trend
-bool sellSignal = finalTrend == -1 and isPullbackSell and bearRejection and momentumSell and noCounterTrendSell and not inTrade and inSession
+// Cooldown after SL
+var int lastSLBar = 0
+bool cooldownOver = bar_index - lastSLBar > cooldownBars
+
+if slHit
+    lastSLBar := bar_index
+
+// Strong pullback filter — narx EMA dan yetarlicha uzoqlashgan bo'lishi kerak
+// Oxirgi 10 bar ichida narx EMA dan kamida 1 ATR uzoqlashgan bo'lishi kerak
+float maxDistBuy = ta.highest(close - ema_slow, 10)
+float maxDistSell = ta.highest(ema_slow - close, 10)
+bool hadStrongPullbackBuy = maxDistBuy > atr * minPullbackATR
+bool hadStrongPullbackSell = maxDistSell > atr * minPullbackATR
+
+// BUY: Trend BUY + Pullback + Rejection + Momentum + No Counter Trend + Filters
+bool buySignal = finalTrend == 1 and isPullbackBuy and bullRejection and momentumBuy and noCounterTrendBuy and not inTrade and inSession and dailySignals < maxDailySignals and cooldownOver and hadStrongPullbackBuy
+
+// SELL: Trend SELL + Pullback + Rejection + Momentum + No Counter Trend + Filters
+bool sellSignal = finalTrend == -1 and isPullbackSell and bearRejection and momentumSell and noCounterTrendSell and not inTrade and inSession and dailySignals < maxDailySignals and cooldownOver and hadStrongPullbackSell
+
+// Update counter
+if buySignal or sellSignal
+    dailySignals += 1
 
 // Open trade
 if buySignal
