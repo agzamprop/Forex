@@ -1,11 +1,11 @@
-// This work is licensed under a Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
-// STX Edge — XAUUSD Signal Indicator
-// Based on: M5 Trend + M1 Pullback + Rejection Candle
+// STX Edge — XAUUSD Signal Indicator v2.0
+// M5 Trend + M1 Pullback + Rejection Candle
 // SL: 50 pips ($5) | TP: 200 pips ($20) | R:R = 1:4
+// Signals are deterministic — same on every device
 
 //@version=5
-indicator('STX Edge — XAUUSD Signal'
-         , 'STX Edge Signal'
+indicator('STX Edge — XAUUSD Signal v2'
+         , 'STX Edge v2'
          , overlay=true
          , max_boxes_count=500
          , max_lines_count=500
@@ -16,34 +16,26 @@ indicator('STX Edge — XAUUSD Signal'
 // Settings
 //-----------------------------------------------------------------------------{
 grpTrend = 'Trend Settings'
-swingLen    = input.int(10, 'Swing Length (Structure)', minval=3, maxval=50, group=grpTrend)
+swingLen    = input.int(10, 'Swing Length', minval=3, maxval=50, group=grpTrend)
 htfTrend    = input.timeframe('5', 'Higher TF for Trend', group=grpTrend)
+useHTF      = input.bool(true, 'Use Multi-Timeframe', group=grpTrend)
+useEMA      = input.bool(true, 'EMA Trend Filter', group=grpTrend)
+emaLen      = input.int(50, 'EMA Length', group=grpTrend)
 
 grpSignal = 'Signal Settings'
 slPips      = input.float(5.0, 'Stop Loss ($)', step=0.5, group=grpSignal)
 tpPips      = input.float(20.0, 'Take Profit ($)', step=1.0, group=grpSignal)
-showBuy     = input.bool(true, 'Show BUY Signals', inline='sig', group=grpSignal)
-showSell    = input.bool(true, 'Show SELL Signals', inline='sig', group=grpSignal)
+zoneBars    = input.int(20, 'Zone Width (bars)', minval=5, maxval=100, group=grpSignal)
 
 grpVisual = 'Visual Settings'
 colBull     = input.color(#089981, 'Bull Color', inline='col', group=grpVisual)
 colBear     = input.color(#f23645, 'Bear Color', inline='col', group=grpVisual)
-colSL       = input.color(color.new(#787b86, 60), 'SL Zone', inline='zone', group=grpVisual)
-colTP       = input.color(color.new(#5b9cf6, 60), 'TP Zone', inline='zone', group=grpVisual)
-showZones   = input.bool(true, 'Show SL/TP Zones', group=grpVisual)
-showStructure = input.bool(true, 'Show Swing Structure', group=grpVisual)
-
-grpFilter = 'Filter Settings'
-useHTF      = input.bool(true, 'Use Multi-Timeframe Filter', group=grpFilter)
-useSession  = input.bool(false, 'Session Filter (London+NY only)', group=grpFilter)
-sessionTime = input.session('0300-1700', 'Session Time (UTC)', group=grpFilter)
-useEMA      = input.bool(true, 'EMA Trend Filter', group=grpFilter)
-emaLen      = input.int(50, 'EMA Length', group=grpFilter)
+colRisk     = input.color(color.new(#787b86, 70), 'Risk Zone', group=grpVisual)
+colReward   = input.color(color.new(#5b9cf6, 70), 'Reward Zone', group=grpVisual)
 
 //-----------------------------------------------------------------------------}
-// Trend Detection — Structure Based
+// Trend Detection
 //-----------------------------------------------------------------------------{
-// Swing Highs and Lows
 ph = ta.pivothigh(high, swingLen, swingLen)
 pl = ta.pivotlow(low, swingLen, swingLen)
 
@@ -51,94 +43,51 @@ var float lastPH = na
 var float prevPH = na
 var float lastPL = na
 var float prevPL = na
-var int lastPHBar = na
-var int lastPLBar = na
 
 if not na(ph)
     prevPH := lastPH
     lastPH := ph
-    lastPHBar := bar_index - swingLen
 
 if not na(pl)
     prevPL := lastPL
     lastPL := pl
-    lastPLBar := bar_index - swingLen
 
-// Structure Trend
-// Downtrend: Lower Highs + Lower Lows
-// Uptrend: Higher Highs + Higher Lows
 var int structureTrend = 0
 
-isHH = not na(lastPH) and not na(prevPH) and lastPH > prevPH
-isHL = not na(lastPL) and not na(prevPL) and lastPL > prevPL
-isLH = not na(lastPH) and not na(prevPH) and lastPH < prevPH
-isLL = not na(lastPL) and not na(prevPL) and lastPL < prevPL
-
-if isHH and isHL
+if not na(lastPH) and not na(prevPH) and lastPH > prevPH and not na(lastPL) and not na(prevPL) and lastPL > prevPL
     structureTrend := 1
-if isLH and isLL
+if not na(lastPH) and not na(prevPH) and lastPH < prevPH and not na(lastPL) and not na(prevPL) and lastPL < prevPL
     structureTrend := -1
 
-// EMA Filter
 ema50 = ta.ema(close, emaLen)
 emaTrend = close > ema50 ? 1 : close < ema50 ? -1 : 0
 
-// Higher Timeframe Trend
-htfEma = request.security(syminfo.tickerid, htfTrend, ta.ema(close, emaLen))
 htfTrendDir = request.security(syminfo.tickerid, htfTrend, close > ta.ema(close, emaLen) ? 1 : close < ta.ema(close, emaLen) ? -1 : 0)
 
-// Combined Trend
 var int finalTrend = 0
-if useHTF
-    if useEMA
-        finalTrend := htfTrendDir == 1 and emaTrend == 1 ? 1 : htfTrendDir == -1 and emaTrend == -1 ? -1 : 0
-    else
-        finalTrend := htfTrendDir
+if useHTF and useEMA
+    finalTrend := htfTrendDir == 1 and emaTrend == 1 ? 1 : htfTrendDir == -1 and emaTrend == -1 ? -1 : 0
+else if useHTF
+    finalTrend := htfTrendDir
+else if useEMA
+    finalTrend := structureTrend == 1 and emaTrend == 1 ? 1 : structureTrend == -1 and emaTrend == -1 ? -1 : 0
 else
-    if useEMA
-        finalTrend := structureTrend == 1 and emaTrend == 1 ? 1 : structureTrend == -1 and emaTrend == -1 ? -1 : 0
-    else
-        finalTrend := structureTrend
-
-//-----------------------------------------------------------------------------}
-// Support / Resistance Zones (Pullback Zones)
-//-----------------------------------------------------------------------------{
-var float resistanceZone = na
-var float supportZone = na
-
-// Recent swing highs/lows as zones
-if not na(ph)
-    resistanceZone := ph
-
-if not na(pl)
-    supportZone := pl
-
-// Dynamic zones based on recent price action
-float dynamicRes = ta.highest(high, swingLen)
-float dynamicSup = ta.lowest(low, swingLen)
-
-// Broken support becomes resistance and vice versa
-var float brokenSupport = na    // Now resistance (SELL zone)
-var float brokenResistance = na // Now support (BUY zone)
-
-if not na(lastPL) and close < lastPL and not na(prevPL)
-    brokenSupport := lastPL
-
-if not na(lastPH) and close > lastPH and not na(prevPH)
-    brokenResistance := lastPH
+    finalTrend := structureTrend
 
 //-----------------------------------------------------------------------------}
 // Pullback Detection
 //-----------------------------------------------------------------------------{
-// EMA as dynamic support/resistance
-float pullbackZoneBuy = math.max(ema50, nz(supportZone))
-float pullbackZoneSell = math.min(ema50, nz(resistanceZone))
-
-// Pullback to EMA or support/resistance
 bool nearEMABuy = low <= ema50 * 1.001 and low >= ema50 * 0.998
 bool nearEMASell = high >= ema50 * 0.999 and high <= ema50 * 1.002
 
-// Pullback to broken level
+var float brokenSupport = na
+var float brokenResistance = na
+
+if not na(lastPL) and close < lastPL and not na(prevPL)
+    brokenSupport := lastPL
+if not na(lastPH) and close > lastPH and not na(prevPH)
+    brokenResistance := lastPH
+
 bool nearBrokenSup = not na(brokenSupport) and high >= brokenSupport * 0.999 and high <= brokenSupport * 1.002
 bool nearBrokenRes = not na(brokenResistance) and low <= brokenResistance * 1.001 and low >= brokenResistance * 0.998
 
@@ -148,45 +97,26 @@ bool isPullbackSell = nearEMASell or nearBrokenSup
 //-----------------------------------------------------------------------------}
 // Rejection Candle Detection
 //-----------------------------------------------------------------------------{
-// Bullish rejection (pin bar or engulfing)
 float bodySize = math.abs(close - open)
 float upperWick = high - math.max(close, open)
 float lowerWick = math.min(close, open) - low
 float candleRange = high - low
 
-// Bullish Pin Bar
 bool bullPinBar = lowerWick > bodySize * 2 and lowerWick > upperWick * 2 and candleRange > 0
-
-// Bullish Engulfing
 bool bullEngulfing = close > open and close[1] < open[1] and close > open[1] and open < close[1]
-
-// Bearish Pin Bar
 bool bearPinBar = upperWick > bodySize * 2 and upperWick > lowerWick * 2 and candleRange > 0
-
-// Bearish Engulfing
 bool bearEngulfing = close < open and close[1] > open[1] and close < open[1] and open > close[1]
 
-// Strong rejection
 bool bullRejection = bullPinBar or bullEngulfing
 bool bearRejection = bearPinBar or bearEngulfing
 
 //-----------------------------------------------------------------------------}
-// Session Filter
+// Signal Generation (Deterministic — same on all devices)
 //-----------------------------------------------------------------------------{
-bool inSession = true
-if useSession
-    inSession := not na(time(timeframe.period, sessionTime))
+bool buySignal = finalTrend == 1 and isPullbackBuy and bullRejection
+bool sellSignal = finalTrend == -1 and isPullbackSell and bearRejection
 
-//-----------------------------------------------------------------------------}
-// Signal Generation
-//-----------------------------------------------------------------------------{
-// BUY Signal: Uptrend + Pullback + Bull Rejection
-bool buySignal = finalTrend == 1 and isPullbackBuy and bullRejection and inSession and showBuy
-
-// SELL Signal: Downtrend + Pullback + Bear Rejection
-bool sellSignal = finalTrend == -1 and isPullbackSell and bearRejection and inSession and showSell
-
-// Prevent consecutive signals (minimum 5 bars between signals)
+// Minimum 5 bars between signals
 var int lastSignalBar = 0
 bool canSignal = bar_index - lastSignalBar > 5
 
@@ -197,160 +127,63 @@ if buySignal or sellSignal
     lastSignalBar := bar_index
 
 //-----------------------------------------------------------------------------}
-// Drawing — SL/TP Zones (LuxAlgo Style)
+// Drawing — Fixed Position Zones (DO NOT MOVE with chart scroll)
+// Each signal creates its own box at signal bar — stays forever
 //-----------------------------------------------------------------------------{
-var box buyRiskBox = na
-var box buyRewardBox = na
-var box sellRiskBox = na
-var box sellRewardBox = na
-var line buySLLine = na
-var line buyTPLine = na
-var line sellSLLine = na
-var line sellTPLine = na
-var line buyEntryLine = na
-var line sellEntryLine = na
-
-if buySignal and showZones
-    // Delete old
-    box.delete(buyRiskBox)
-    box.delete(buyRewardBox)
-    line.delete(buySLLine)
-    line.delete(buyTPLine)
-    line.delete(buyEntryLine)
-    
+if buySignal
     float entry = close
     float sl = entry - slPips
     float tp = entry + tpPips
+    int startBar = bar_index
+    int endBar = bar_index + zoneBars
     
-    // Risk zone (entry to SL)
-    buyRiskBox := box.new(
-      bar_index, entry, bar_index + 30, sl,
-      border_color=color.new(na, na),
-      bgcolor=colSL)
+    // Risk zone (SL area) — entry to SL
+    box.new(startBar, entry, endBar, sl,
+      border_color=color.new(colBear, 80),
+      bgcolor=colRisk)
     
-    // Reward zone (entry to TP)
-    buyRewardBox := box.new(
-      bar_index, tp, bar_index + 30, entry,
-      border_color=color.new(na, na),
-      bgcolor=colTP)
+    // Reward zone (TP area) — entry to TP
+    box.new(startBar, tp, endBar, entry,
+      border_color=color.new(colBull, 80),
+      bgcolor=colReward)
     
-    // Entry line
-    buyEntryLine := line.new(
-      bar_index, entry, bar_index + 30, entry,
-      color=color.new(chart.fg_color, 50),
-      style=line.style_dashed)
-    
-    // SL line
-    buySLLine := line.new(
-      bar_index, sl, bar_index + 30, sl,
-      color=colBear,
-      style=line.style_dotted,
-      width=1)
-    
-    // TP line
-    buyTPLine := line.new(
-      bar_index, tp, bar_index + 30, tp,
-      color=colBull,
-      style=line.style_dotted,
-      width=1)
+    // Signal label
+    label.new(startBar, low,
+      text='▲ BUY',
+      color=color.new(colBull, 80),
+      textcolor=colBull,
+      style=label.style_label_up,
+      size=size.small)
 
-if sellSignal and showZones
-    // Delete old
-    box.delete(sellRiskBox)
-    box.delete(sellRewardBox)
-    line.delete(sellSLLine)
-    line.delete(sellTPLine)
-    line.delete(sellEntryLine)
-    
+if sellSignal
     float entry = close
     float sl = entry + slPips
     float tp = entry - tpPips
+    int startBar = bar_index
+    int endBar = bar_index + zoneBars
     
-    // Risk zone (entry to SL)
-    sellRiskBox := box.new(
-      bar_index, sl, bar_index + 30, entry,
-      border_color=color.new(na, na),
-      bgcolor=colSL)
+    // Risk zone (SL area) — entry to SL
+    box.new(startBar, sl, endBar, entry,
+      border_color=color.new(colBear, 80),
+      bgcolor=colRisk)
     
-    // Reward zone (entry to TP)
-    sellRewardBox := box.new(
-      bar_index, entry, bar_index + 30, tp,
-      border_color=color.new(na, na),
-      bgcolor=colTP)
+    // Reward zone (TP area) — entry to TP
+    box.new(startBar, entry, endBar, tp,
+      border_color=color.new(colBull, 80),
+      bgcolor=colReward)
     
-    // Entry line
-    sellEntryLine := line.new(
-      bar_index, entry, bar_index + 30, entry,
-      color=color.new(chart.fg_color, 50),
-      style=line.style_dashed)
-    
-    // SL line
-    sellSLLine := line.new(
-      bar_index, sl, bar_index + 30, sl,
-      color=colBear,
-      style=line.style_dotted,
-      width=1)
-    
-    // TP line
-    sellTPLine := line.new(
-      bar_index, tp, bar_index + 30, tp,
-      color=colBull,
-      style=line.style_dotted,
-      width=1)
-
-//-----------------------------------------------------------------------------}
-// Labels (Signal Arrows) — LuxAlgo Style
-//-----------------------------------------------------------------------------{
-if buySignal
-    label.new(
-      bar_index, low,
-      text='●',
-      color=color.new(na, na),
-      textcolor=colBull,
-      style=label.style_label_up,
-      size=size.small)
-    
-    label.new(
-      bar_index, low - (slPips * 0.3),
-      text='BUY\nSL: ' + str.tostring(close - slPips, '#.##') + '\nTP: ' + str.tostring(close + tpPips, '#.##'),
-      color=color.new(colBull, 85),
-      textcolor=colBull,
-      style=label.style_label_up,
-      size=size.tiny)
-
-if sellSignal
-    label.new(
-      bar_index, high,
-      text='●',
-      color=color.new(na, na),
+    // Signal label
+    label.new(startBar, high,
+      text='▼ SELL',
+      color=color.new(colBear, 80),
       textcolor=colBear,
       style=label.style_label_down,
       size=size.small)
-    
-    label.new(
-      bar_index, high + (slPips * 0.3),
-      text='SELL\nSL: ' + str.tostring(close + slPips, '#.##') + '\nTP: ' + str.tostring(close - tpPips, '#.##'),
-      color=color.new(colBear, 85),
-      textcolor=colBear,
-      style=label.style_label_down,
-      size=size.tiny)
 
 //-----------------------------------------------------------------------------}
-// Plot EMA
+// Plot EMA (minimal)
 //-----------------------------------------------------------------------------{
-plot(useEMA ? ema50 : na, 'EMA 50', color=color.new(#5b9cf6, 30), linewidth=2)
-plot(useHTF ? htfEma : na, 'HTF EMA', color=color.new(#f5a623, 50), linewidth=1, style=plot.style_cross)
-
-//-----------------------------------------------------------------------------}
-// Swing Structure Markers
-//-----------------------------------------------------------------------------{
-plotshape(showStructure and not na(ph) ? ph : na, 'Swing High', shape.triangledown, location.abovebar, color.new(colBear, 60), offset=-swingLen, size=size.tiny)
-plotshape(showStructure and not na(pl) ? pl : na, 'Swing Low', shape.triangleup, location.belowbar, color.new(colBull, 60), offset=-swingLen, size=size.tiny)
-
-//-----------------------------------------------------------------------------}
-// Background — Trend Color
-//-----------------------------------------------------------------------------{
-bgcolor(finalTrend == 1 ? color.new(colBull, 97) : finalTrend == -1 ? color.new(colBear, 97) : na)
+plot(useEMA ? ema50 : na, 'EMA 50', color=color.new(#5b9cf6, 50), linewidth=1)
 
 //-----------------------------------------------------------------------------}
 // Alerts
@@ -358,28 +191,5 @@ bgcolor(finalTrend == 1 ? color.new(colBull, 97) : finalTrend == -1 ? color.new(
 alertcondition(buySignal, 'BUY Signal', 'STX Edge: BUY Signal on {{ticker}} at {{close}}')
 alertcondition(sellSignal, 'SELL Signal', 'STX Edge: SELL Signal on {{ticker}} at {{close}}')
 alertcondition(buySignal or sellSignal, 'Any Signal', 'STX Edge: Signal on {{ticker}} at {{close}}')
-
-//-----------------------------------------------------------------------------}
-// Info Table
-//-----------------------------------------------------------------------------{
-var table infoTable = table.new(position.top_right, 2, 5, bgcolor=color.new(#1a1a2e, 10), border_color=color.new(chart.fg_color, 80), border_width=1)
-
-if barstate.islast
-    table.cell(infoTable, 0, 0, 'STX Edge', text_color=color.new(#5b9cf6, 0), text_size=size.small)
-    table.cell(infoTable, 1, 0, 'v1.0', text_color=color.new(chart.fg_color, 50), text_size=size.tiny)
-    
-    trendText = finalTrend == 1 ? '▲ BUY' : finalTrend == -1 ? '▼ SELL' : '● FLAT'
-    trendColor = finalTrend == 1 ? colBull : finalTrend == -1 ? colBear : color.gray
-    table.cell(infoTable, 0, 1, 'Trend:', text_color=color.new(chart.fg_color, 30), text_size=size.tiny)
-    table.cell(infoTable, 1, 1, trendText, text_color=trendColor, text_size=size.tiny)
-    
-    table.cell(infoTable, 0, 2, 'SL:', text_color=color.new(chart.fg_color, 30), text_size=size.tiny)
-    table.cell(infoTable, 1, 2, '$' + str.tostring(slPips, '#.#'), text_color=colBear, text_size=size.tiny)
-    
-    table.cell(infoTable, 0, 3, 'TP:', text_color=color.new(chart.fg_color, 30), text_size=size.tiny)
-    table.cell(infoTable, 1, 3, '$' + str.tostring(tpPips, '#.#'), text_color=colBull, text_size=size.tiny)
-    
-    table.cell(infoTable, 0, 4, 'R:R', text_color=color.new(chart.fg_color, 30), text_size=size.tiny)
-    table.cell(infoTable, 1, 4, '1:' + str.tostring(tpPips/slPips, '#.#'), text_color=color.new(#5b9cf6, 0), text_size=size.tiny)
 
 //-----------------------------------------------------------------------------}
