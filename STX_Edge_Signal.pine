@@ -1,10 +1,11 @@
-// STX Edge — XAUUSD Signal Indicator v2.1
-// FIXED: Zones stay at price level, don't move with chart
+// STX Edge — XAUUSD Signal Indicator v2.2
+// Signal faqat oldingi savdo tugagandan keyin beradi
+// Faqat London + New York sessiyasida ishlaydi
 // SL: 50 pips ($5) | TP: 200 pips ($20) | R:R = 1:4
 
 //@version=5
-indicator('STX Edge — XAUUSD Signal v2.1'
-         , 'STX Edge v2.1'
+indicator('STX Edge — XAUUSD Signal v2.2'
+         , 'STX Edge v2.2'
          , overlay=true
          , max_boxes_count=500
          , max_lines_count=500
@@ -25,11 +26,25 @@ grpSignal = 'Signal Settings'
 slPips      = input.float(5.0, 'Stop Loss ($)', step=0.5, group=grpSignal)
 tpPips      = input.float(20.0, 'Take Profit ($)', step=1.0, group=grpSignal)
 
+grpSession = 'Session Settings'
+londonStart = input.int(3, 'London Start (UTC hour)', minval=0, maxval=23, group=grpSession)
+londonEnd   = input.int(12, 'London End (UTC hour)', minval=0, maxval=23, group=grpSession)
+nyStart     = input.int(8, 'New York Start (UTC hour)', minval=0, maxval=23, group=grpSession)
+nyEnd       = input.int(17, 'New York End (UTC hour)', minval=0, maxval=23, group=grpSession)
+
 grpVisual = 'Visual Settings'
 colBull     = input.color(#089981, 'Bull Color', inline='col', group=grpVisual)
 colBear     = input.color(#f23645, 'Bear Color', inline='col', group=grpVisual)
 colRisk     = input.color(color.new(#787b86, 70), 'Risk Zone (SL)', group=grpVisual)
 colReward   = input.color(color.new(#5b9cf6, 70), 'Reward Zone (TP)', group=grpVisual)
+
+//-----------------------------------------------------------------------------}
+// Session Filter — London + New York only
+//-----------------------------------------------------------------------------{
+utcHour = hour(time, 'UTC')
+bool inLondon = utcHour >= londonStart and utcHour < londonEnd
+bool inNY = utcHour >= nyStart and utcHour < nyEnd
+bool inSession = inLondon or inNY
 
 //-----------------------------------------------------------------------------}
 // Trend Detection
@@ -109,78 +124,84 @@ bool bullRejection = bullPinBar or bullEngulfing
 bool bearRejection = bearPinBar or bearEngulfing
 
 //-----------------------------------------------------------------------------}
-// Signal Generation
+// Trade State — Yangi signal faqat oldingi savdo TUGAGANDAN keyin
 //-----------------------------------------------------------------------------{
-bool buySignal = finalTrend == 1 and isPullbackBuy and bullRejection
-bool sellSignal = finalTrend == -1 and isPullbackSell and bearRejection
+var bool inTrade = false        // Savdo ochiqmi?
+var float tradeEntry = na       // Kirish narxi
+var float tradeSL = na          // SL narxi
+var float tradeTP = na          // TP narxi
+var int tradeDir = 0            // 1 = BUY, -1 = SELL
+var int tradeBar = na           // Signal bar
 
-var int lastSignalBar = 0
-bool canSignal = bar_index - lastSignalBar > 5
+// Savdo tugaganligini tekshirish
+bool tpHit = false
+bool slHit = false
 
-buySignal := buySignal and canSignal
-sellSignal := sellSignal and canSignal
-
-if buySignal or sellSignal
-    lastSignalBar := bar_index
+if inTrade
+    if tradeDir == 1  // BUY ochiq
+        tpHit := high >= tradeTP
+        slHit := low <= tradeSL
+    if tradeDir == -1  // SELL ochiq
+        tpHit := low <= tradeTP
+        slHit := high >= tradeSL
+    
+    if tpHit or slHit
+        inTrade := false
+        tradeEntry := na
+        tradeSL := na
+        tradeTP := na
+        tradeDir := 0
 
 //-----------------------------------------------------------------------------}
-// Drawing — FIXED PRICE LINES (hline style — never moves)
-// Using plot + plotshape for permanent, non-moving visuals
+// Signal Generation
 //-----------------------------------------------------------------------------{
+bool rawBuy = finalTrend == 1 and isPullbackBuy and bullRejection
+bool rawSell = finalTrend == -1 and isPullbackSell and bearRejection
 
-// Store signal data for drawing horizontal lines
-var float buyEntry = na
-var float buySL = na
-var float buyTP = na
-var int buyBar = na
+// Signal faqat:
+// 1. Savdo ochiq BO'LMASA (oldingi tugagan)
+// 2. Sessiya ichida (London yoki NY)
+bool buySignal = rawBuy and not inTrade and inSession
+bool sellSignal = rawSell and not inTrade and inSession
 
-var float sellEntry = na
-var float sellSL = na
-var float sellTP = na
-var int sellBar = na
-
+// Signal berilganda — savdoni "ochish"
 if buySignal
-    buyEntry := close
-    buySL := close - slPips
-    buyTP := close + tpPips
-    buyBar := bar_index
+    inTrade := true
+    tradeEntry := close
+    tradeSL := close - slPips
+    tradeTP := close + tpPips
+    tradeDir := 1
+    tradeBar := bar_index
 
 if sellSignal
-    sellEntry := close
-    sellSL := close + slPips
-    sellTP := close - tpPips
-    sellBar := bar_index
+    inTrade := true
+    tradeEntry := close
+    tradeSL := close + slPips
+    tradeTP := close - tpPips
+    tradeDir := -1
+    tradeBar := bar_index
 
-// Draw zones using line.new with extend=none and fixed x coordinates
-// Lines are drawn from signal bar to signal bar + fixed offset
-// They use PRICE values so they NEVER move vertically
-
+//-----------------------------------------------------------------------------}
+// Drawing — Fixed zones at signal bar
+//-----------------------------------------------------------------------------{
 if buySignal
     float _entry = close
     float _sl = close - slPips
     float _tp = close + tpPips
     int _left = bar_index
-    int _right = bar_index + 1  // minimal width — box extends right on each bar
+    int _right = bar_index + 20
     
-    // Entry line (dashed)
-    line.new(_left, _entry, _left + 20, _entry, 
+    // Risk zone (SL)
+    box.new(_left, _entry, _right, _sl,
+      border_color=color.new(colBear, 85), bgcolor=colRisk)
+    
+    // Reward zone (TP)
+    box.new(_left, _tp, _right, _entry,
+      border_color=color.new(colBull, 85), bgcolor=colReward)
+    
+    // Entry line
+    line.new(_left, _entry, _right, _entry,
       color=color.new(chart.fg_color, 60), style=line.style_dashed, width=1)
-    
-    // SL line (red dotted)
-    line.new(_left, _sl, _left + 20, _sl, 
-      color=colBear, style=line.style_dotted, width=1)
-    
-    // TP line (green dotted)
-    line.new(_left, _tp, _left + 20, _tp, 
-      color=colBull, style=line.style_dotted, width=1)
-    
-    // Risk box (entry to SL) — FIXED narx da
-    box.new(_left, _entry, _left + 20, _sl,
-      border_color=color.new(na, na), bgcolor=colRisk)
-    
-    // Reward box (entry to TP) — FIXED narx da
-    box.new(_left, _tp, _left + 20, _entry,
-      border_color=color.new(na, na), bgcolor=colReward)
     
     // BUY label
     label.new(_left, _sl,
@@ -195,26 +216,19 @@ if sellSignal
     float _sl = close + slPips
     float _tp = close - tpPips
     int _left = bar_index
+    int _right = bar_index + 20
     
-    // Entry line (dashed)
-    line.new(_left, _entry, _left + 20, _entry, 
+    // Risk zone (SL)
+    box.new(_left, _sl, _right, _entry,
+      border_color=color.new(colBear, 85), bgcolor=colRisk)
+    
+    // Reward zone (TP)
+    box.new(_left, _entry, _right, _tp,
+      border_color=color.new(colBull, 85), bgcolor=colReward)
+    
+    // Entry line
+    line.new(_left, _entry, _right, _entry,
       color=color.new(chart.fg_color, 60), style=line.style_dashed, width=1)
-    
-    // SL line (red dotted)
-    line.new(_left, _sl, _left + 20, _sl, 
-      color=colBear, style=line.style_dotted, width=1)
-    
-    // TP line (green dotted)
-    line.new(_left, _tp, _left + 20, _tp, 
-      color=colBull, style=line.style_dotted, width=1)
-    
-    // Risk box (entry to SL) — FIXED narx da
-    box.new(_left, _sl, _left + 20, _entry,
-      border_color=color.new(na, na), bgcolor=colRisk)
-    
-    // Reward box (entry to TP) — FIXED narx da
-    box.new(_left, _entry, _left + 20, _tp,
-      border_color=color.new(na, na), bgcolor=colReward)
     
     // SELL label
     label.new(_left, _sl,
@@ -223,6 +237,28 @@ if sellSignal
       textcolor=colBear,
       style=label.style_label_down,
       size=size.small)
+
+// TP/SL hit markers
+if tpHit
+    label.new(bar_index, tradeDir == 1 ? high : low,
+      text='✓ TP',
+      color=color.new(colBull, 70),
+      textcolor=colBull,
+      style=tradeDir == 1 ? label.style_label_down : label.style_label_up,
+      size=size.tiny)
+
+if slHit
+    label.new(bar_index, tradeDir == 1 ? low : high,
+      text='✗ SL',
+      color=color.new(colBear, 70),
+      textcolor=colBear,
+      style=tradeDir == 1 ? label.style_label_up : label.style_label_down,
+      size=size.tiny)
+
+//-----------------------------------------------------------------------------}
+// Session Background (optional visual)
+//-----------------------------------------------------------------------------{
+bgcolor(inSession ? color.new(#5b9cf6, 97) : na)
 
 //-----------------------------------------------------------------------------}
 // Plot EMA
@@ -235,5 +271,7 @@ plot(useEMA ? ema50 : na, 'EMA 50', color=color.new(#5b9cf6, 50), linewidth=1)
 alertcondition(buySignal, 'BUY Signal', 'STX Edge: BUY Signal on {{ticker}} at {{close}}')
 alertcondition(sellSignal, 'SELL Signal', 'STX Edge: SELL Signal on {{ticker}} at {{close}}')
 alertcondition(buySignal or sellSignal, 'Any Signal', 'STX Edge: Signal on {{ticker}} at {{close}}')
+alertcondition(tpHit, 'TP Hit', 'STX Edge: Take Profit hit on {{ticker}}')
+alertcondition(slHit, 'SL Hit', 'STX Edge: Stop Loss hit on {{ticker}}')
 
 //-----------------------------------------------------------------------------}
