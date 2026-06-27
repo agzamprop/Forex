@@ -1,0 +1,385 @@
+// STX Edge — XAUUSD Signal Indicator v3.0
+// MENING HAQIQIY TAHLIL USULIM — to'liq indicator
+// 1. M5 Structure Trend (HH/HL, LH/LL)
+// 2. M1 Pullback to key zone
+// 3. Rejection candle + Momentum filter
+// 4. Trendga qarshi signal BERMAYDI
+// 5. Box: signal → TP/SL gacha cho'ziladi
+// SL: $5 | TP: $20 | R:R = 1:4
+
+//@version=5
+indicator('STX Edge — XAUUSD v3.0'
+         , 'STX Edge v3'
+         , overlay=true
+         , max_boxes_count=500
+         , max_lines_count=500
+         , max_labels_count=500
+         )
+
+//------------------------------------------------------------------------------
+// Settings
+//-----------------------------------------------------------------------------{
+grpTrend = 'Trend Settings'
+swingLen    = input.int(8, 'Swing Length (Structure)', minval=3, maxval=30, group=grpTrend, tooltip='Kichikroq = tezroq signal, kattaroq = aniqroq trend')
+htfTrend    = input.timeframe('5', 'Higher TF (M5)', group=grpTrend)
+useHTF      = input.bool(true, 'Multi-Timeframe Trend', group=grpTrend)
+emaLen      = input.int(50, 'EMA Length', group=grpTrend)
+emaFast     = input.int(20, 'Fast EMA (momentum)', group=grpTrend)
+
+grpSignal = 'Signal Settings'
+slPips      = input.float(5.0, 'Stop Loss ($)', step=0.5, group=grpSignal)
+tpPips      = input.float(20.0, 'Take Profit ($)', step=1.0, group=grpSignal)
+minBodyATR  = input.float(0.3, 'Min Rejection Body (x ATR)', step=0.1, group=grpSignal, tooltip='Rejection candle min kuchi')
+maxDailySignals = input.int(2, 'Max signals per day', minval=1, maxval=5, group=grpSignal)
+cooldownBars = input.int(20, 'Cooldown after SL (bars)', minval=5, maxval=50, group=grpSignal, tooltip='SL dan keyin necha bar kutish')
+minPullbackATR = input.float(1.0, 'Min Pullback Distance (x ATR)', step=0.1, group=grpSignal, tooltip='Narx EMA dan kamida shu qadar uzoqlashgan bolishi kerak')
+
+grpSession = 'Session Settings'
+londonStart = input.int(3, 'London Start (UTC)', minval=0, maxval=23, group=grpSession)
+londonEnd   = input.int(12, 'London End (UTC)', minval=0, maxval=23, group=grpSession)
+nyStart     = input.int(8, 'NY Start (UTC)', minval=0, maxval=23, group=grpSession)
+nyEnd       = input.int(17, 'NY End (UTC)', minval=0, maxval=23, group=grpSession)
+
+grpVisual = 'Visual Settings'
+colBull     = input.color(#089981, 'Bull', inline='col', group=grpVisual)
+colBear     = input.color(#f23645, 'Bear', inline='col', group=grpVisual)
+colRisk     = input.color(color.new(#787b86, 70), 'Risk Zone', group=grpVisual)
+colReward   = input.color(color.new(#5b9cf6, 70), 'Reward Zone', group=grpVisual)
+showEMA     = input.bool(true, 'Show EMA', group=grpVisual)
+
+//-----------------------------------------------------------------------------}
+// Session Filter
+//-----------------------------------------------------------------------------{
+utcHour = hour(time, 'UTC')
+bool inLondon = utcHour >= londonStart and utcHour < londonEnd
+bool inNY = utcHour >= nyStart and utcHour < nyEnd
+bool inSession = inLondon or inNY
+
+//-----------------------------------------------------------------------------}
+// Core Indicators
+//-----------------------------------------------------------------------------{
+ema_slow = ta.ema(close, emaLen)
+ema_fast = ta.ema(close, emaFast)
+atr = ta.atr(14)
+
+//-----------------------------------------------------------------------------}
+// M1 STRUCTURE TREND — Mening asosiy tahlilim
+// Higher Highs + Higher Lows = BUY
+// Lower Highs + Lower Lows = SELL
+// Boshqa = FLAT (signal yo'q)
+//-----------------------------------------------------------------------------{
+// Swing detection (local M1)
+localSwingLen = 5
+localPH = ta.pivothigh(high, localSwingLen, localSwingLen)
+localPL = ta.pivotlow(low, localSwingLen, localSwingLen)
+
+var float m1_lastHigh = na
+var float m1_prevHigh = na
+var float m1_lastLow = na
+var float m1_prevLow = na
+
+if not na(localPH)
+    m1_prevHigh := m1_lastHigh
+    m1_lastHigh := localPH
+
+if not na(localPL)
+    m1_prevLow := m1_lastLow
+    m1_lastLow := localPL
+
+// M1 Structure
+bool m1_HH = not na(m1_lastHigh) and not na(m1_prevHigh) and m1_lastHigh > m1_prevHigh
+bool m1_HL = not na(m1_lastLow) and not na(m1_prevLow) and m1_lastLow > m1_prevLow
+bool m1_LH = not na(m1_lastHigh) and not na(m1_prevHigh) and m1_lastHigh < m1_prevHigh
+bool m1_LL = not na(m1_lastLow) and not na(m1_prevLow) and m1_lastLow < m1_prevLow
+
+var int m1Trend = 0
+if m1_HH and m1_HL
+    m1Trend := 1   // BUY structure
+if m1_LH and m1_LL
+    m1Trend := -1  // SELL structure
+
+//-----------------------------------------------------------------------------}
+// M5 STRUCTURE TREND (Higher Timeframe)
+//-----------------------------------------------------------------------------{
+// M5 swing highs/lows
+ph = ta.pivothigh(high, swingLen, swingLen)
+pl = ta.pivotlow(low, swingLen, swingLen)
+
+var float m5_lastHigh = na
+var float m5_prevHigh = na
+var float m5_lastLow = na
+var float m5_prevLow = na
+
+if not na(ph)
+    m5_prevHigh := m5_lastHigh
+    m5_lastHigh := ph
+
+if not na(pl)
+    m5_prevLow := m5_lastLow
+    m5_lastLow := pl
+
+var int m5Trend = 0
+if not na(m5_lastHigh) and not na(m5_prevHigh) and m5_lastHigh > m5_prevHigh and not na(m5_lastLow) and not na(m5_prevLow) and m5_lastLow > m5_prevLow
+    m5Trend := 1
+if not na(m5_lastHigh) and not na(m5_prevHigh) and m5_lastHigh < m5_prevHigh and not na(m5_lastLow) and not na(m5_prevLow) and m5_lastLow < m5_prevLow
+    m5Trend := -1
+
+// HTF confirmation
+htfClose = request.security(syminfo.tickerid, htfTrend, close)
+htfEma = request.security(syminfo.tickerid, htfTrend, ta.ema(close, emaLen))
+int htfDir = htfClose > htfEma ? 1 : htfClose < htfEma ? -1 : 0
+
+//-----------------------------------------------------------------------------}
+// FINAL TREND — M1 + M5 + EMA alignment
+// Signal faqat HAMMASI BIR YO'NALISHDA bo'lganda
+//-----------------------------------------------------------------------------{
+var int finalTrend = 0
+
+// EMA trend
+int emaTrendDir = ema_fast > ema_slow ? 1 : ema_fast < ema_slow ? -1 : 0
+
+// MUHIM: Hammasi bir yo'nalishda bo'lishi kerak
+if useHTF
+    // BUY: M1 BUY + M5 BUY + EMA BUY + HTF BUY
+    if m1Trend == 1 and (m5Trend == 1 or htfDir == 1) and emaTrendDir == 1
+        finalTrend := 1
+    // SELL: M1 SELL + M5 SELL + EMA SELL + HTF SELL
+    else if m1Trend == -1 and (m5Trend == -1 or htfDir == -1) and emaTrendDir == -1
+        finalTrend := -1
+    else
+        finalTrend := 0  // FLAT — signal yo'q
+else
+    if m1Trend == 1 and m5Trend == 1 and emaTrendDir == 1
+        finalTrend := 1
+    else if m1Trend == -1 and m5Trend == -1 and emaTrendDir == -1
+        finalTrend := -1
+    else
+        finalTrend := 0
+
+//-----------------------------------------------------------------------------}
+// PULLBACK DETECTION — Narx zonaga qaytganini aniqlash
+//-----------------------------------------------------------------------------{
+// 1. EMA ga qaytish (asosiy)
+bool pullbackToBuyZone = low <= ema_slow * 1.0015 and low >= ema_slow * 0.997
+bool pullbackToSellZone = high >= ema_slow * 0.9985 and high <= ema_slow * 1.003
+
+// 2. Fast EMA ga qaytish (tezroq)
+bool pullbackToFastBuy = low <= ema_fast * 1.001 and low >= ema_fast * 0.998
+bool pullbackToFastSell = high >= ema_fast * 0.999 and high <= ema_fast * 1.002
+
+// 3. Oxirgi swing low/high ga qaytish (broken level)
+var float brokenSupport = na
+var float brokenResistance = na
+
+if not na(m5_lastLow) and close < m5_lastLow and not na(m5_prevLow)
+    brokenSupport := m5_lastLow
+if not na(m5_lastHigh) and close > m5_lastHigh and not na(m5_prevHigh)
+    brokenResistance := m5_lastHigh
+
+bool pullbackToBrokenSup = not na(brokenSupport) and high >= brokenSupport * 0.999 and high <= brokenSupport * 1.003
+bool pullbackToBrokenRes = not na(brokenResistance) and low <= brokenResistance * 1.001 and low >= brokenResistance * 0.997
+
+// Final pullback
+bool isPullbackBuy = pullbackToBuyZone or pullbackToFastBuy or pullbackToBrokenRes
+bool isPullbackSell = pullbackToSellZone or pullbackToFastSell or pullbackToBrokenSup
+
+//-----------------------------------------------------------------------------}
+// REJECTION CANDLE — Kuchli candle detection
+//-----------------------------------------------------------------------------{
+float bodyAbs = math.abs(close - open)
+float upperWick = high - math.max(close, open)
+float lowerWick = math.min(close, open) - low
+float totalRange = high - low
+
+// MINIMUM kuch — zaif candle da signal bermayman
+bool minStrength = totalRange > atr * minBodyATR
+
+// Bullish Rejection (kuchli)
+bool bullPinBar = lowerWick > bodyAbs * 2.0 and lowerWick > upperWick * 1.5 and close > open and minStrength
+bool bullEngulfing = close > open and close[1] < open[1] and close > high[1] and open <= close[1] and bodyAbs > atr * 0.2
+
+// Bearish Rejection (kuchli)
+bool bearPinBar = upperWick > bodyAbs * 2.0 and upperWick > lowerWick * 1.5 and close < open and minStrength
+bool bearEngulfing = close < open and close[1] > open[1] and close < low[1] and open >= close[1] and bodyAbs > atr * 0.2
+
+// Hammer (bullish) va Shooting Star (bearish)
+bool hammer = lowerWick > totalRange * 0.6 and upperWick < totalRange * 0.15 and bodyAbs > 0 and minStrength
+bool shootingStar = upperWick > totalRange * 0.6 and lowerWick < totalRange * 0.15 and bodyAbs > 0 and minStrength
+
+bool bullRejection = bullPinBar or bullEngulfing or hammer
+bool bearRejection = bearPinBar or bearEngulfing or shootingStar
+
+//-----------------------------------------------------------------------------}
+// MOMENTUM FILTER — Trendga qarshi signal bermaslik
+// Agar narx EMA dan UZOQLASHAYOTGAN bo'lsa — signal ber
+// Agar narx EMA ga YAQINLASHAYOTGAN va o'tib ketayotgan bo'lsa — signal BERMA
+//-----------------------------------------------------------------------------{
+// Narx EMA dan qay tomondaligini va yo'nalishini tekshirish
+float distFromEMA = close - ema_slow
+float prevDistFromEMA = close[3] - ema_slow[3]
+
+// BUY uchun: narx EMA ustida va EMA dan uzoqlashayotgan yoki hozirgina qaytgan
+bool momentumBuy = close > ema_slow and close > ema_fast
+
+// SELL uchun: narx EMA ostida va EMA dan uzoqlashayotgan yoki hozirgina qaytgan
+bool momentumSell = close < ema_slow and close < ema_fast
+
+// ANTI-TREND FILTER: Agar M1 trendga QARSHI bo'lsa — signal berma
+// Masalan: M5 SELL lekin M1 allaqachon BUY structure qilgan = kirmaslik
+bool noCounterTrendBuy = m1Trend != -1   // M1 SELL bo'lmasa — BUY mumkin
+bool noCounterTrendSell = m1Trend != 1   // M1 BUY bo'lmasa — SELL mumkin
+
+//-----------------------------------------------------------------------------}
+// TRADE STATE — 1 signal = 1 savdo
+//-----------------------------------------------------------------------------{
+var bool inTrade = false
+var float tradeEntry = na
+var float tradeSL = na
+var float tradeTP = na
+var int tradeDir = 0
+
+var box riskBox = na
+var box rewardBox = na
+var line entryLine = na
+
+bool tpHit = false
+bool slHit = false
+
+if inTrade
+    if tradeDir == 1
+        tpHit := high >= tradeTP
+        slHit := low <= tradeSL
+    if tradeDir == -1
+        tpHit := low <= tradeTP
+        slHit := high >= tradeSL
+    
+    if not tpHit and not slHit
+        box.set_right(riskBox, bar_index + 1)
+        box.set_right(rewardBox, bar_index + 1)
+        line.set_x2(entryLine, bar_index + 1)
+    
+    if tpHit or slHit
+        box.set_right(riskBox, bar_index)
+        box.set_right(rewardBox, bar_index)
+        line.set_x2(entryLine, bar_index)
+        
+        inTrade := false
+        tradeEntry := na
+        tradeSL := na
+        tradeTP := na
+        tradeDir := 0
+
+//-----------------------------------------------------------------------------}
+// SIGNAL GENERATION — Mening haqiqiy tahlilim
+//-----------------------------------------------------------------------------{
+// Daily signal counter
+var int dailySignals = 0
+var int lastDay = 0
+int today = dayofweek
+if today != lastDay
+    dailySignals := 0
+    lastDay := today
+
+// Cooldown after SL
+var int lastSLBar = 0
+bool cooldownOver = bar_index - lastSLBar > cooldownBars
+
+if slHit
+    lastSLBar := bar_index
+
+// Strong pullback filter — narx EMA dan yetarlicha uzoqlashgan bo'lishi kerak
+// Oxirgi 10 bar ichida narx EMA dan kamida 1 ATR uzoqlashgan bo'lishi kerak
+float maxDistBuy = ta.highest(close - ema_slow, 10)
+float maxDistSell = ta.highest(ema_slow - close, 10)
+bool hadStrongPullbackBuy = maxDistBuy > atr * minPullbackATR
+bool hadStrongPullbackSell = maxDistSell > atr * minPullbackATR
+
+// BUY: Trend BUY + Pullback + Rejection + Momentum + No Counter Trend + Filters
+bool buySignal = finalTrend == 1 and isPullbackBuy and bullRejection and momentumBuy and noCounterTrendBuy and not inTrade and inSession and dailySignals < maxDailySignals and cooldownOver and hadStrongPullbackBuy
+
+// SELL: Trend SELL + Pullback + Rejection + Momentum + No Counter Trend + Filters
+bool sellSignal = finalTrend == -1 and isPullbackSell and bearRejection and momentumSell and noCounterTrendSell and not inTrade and inSession and dailySignals < maxDailySignals and cooldownOver and hadStrongPullbackSell
+
+// Update counter
+if buySignal or sellSignal
+    dailySignals += 1
+
+// Open trade
+if buySignal
+    inTrade := true
+    tradeEntry := close
+    tradeSL := close - slPips
+    tradeTP := close + tpPips
+    tradeDir := 1
+    
+    riskBox := box.new(bar_index, close, bar_index + 1, close - slPips,
+      border_color=color.new(colBear, 85), bgcolor=colRisk)
+    rewardBox := box.new(bar_index, close + tpPips, bar_index + 1, close,
+      border_color=color.new(colBull, 85), bgcolor=colReward)
+    entryLine := line.new(bar_index, close, bar_index + 1, close,
+      color=color.new(chart.fg_color, 60), style=line.style_dashed, width=1)
+    
+    label.new(bar_index, close - slPips,
+      text='▲ BUY\n' + str.tostring(close, '#.##'),
+      color=color.new(colBull, 85),
+      textcolor=colBull,
+      style=label.style_label_up,
+      size=size.small)
+
+if sellSignal
+    inTrade := true
+    tradeEntry := close
+    tradeSL := close + slPips
+    tradeTP := close - tpPips
+    tradeDir := -1
+    
+    riskBox := box.new(bar_index, close + slPips, bar_index + 1, close,
+      border_color=color.new(colBear, 85), bgcolor=colRisk)
+    rewardBox := box.new(bar_index, close, bar_index + 1, close - tpPips,
+      border_color=color.new(colBull, 85), bgcolor=colReward)
+    entryLine := line.new(bar_index, close, bar_index + 1, close,
+      color=color.new(chart.fg_color, 60), style=line.style_dashed, width=1)
+    
+    label.new(bar_index, close + slPips,
+      text='▼ SELL\n' + str.tostring(close, '#.##'),
+      color=color.new(colBear, 85),
+      textcolor=colBear,
+      style=label.style_label_down,
+      size=size.small)
+
+// TP/SL markers
+if tpHit
+    label.new(bar_index, tradeDir == 1 ? high : low,
+      text='✓ TP',
+      color=color.new(colBull, 70),
+      textcolor=colBull,
+      style=tradeDir == 1 ? label.style_label_down : label.style_label_up,
+      size=size.tiny)
+
+if slHit
+    label.new(bar_index, tradeDir == 1 ? low : high,
+      text='✗ SL',
+      color=color.new(colBear, 70),
+      textcolor=colBear,
+      style=tradeDir == 1 ? label.style_label_up : label.style_label_down,
+      size=size.tiny)
+
+//-----------------------------------------------------------------------------}
+// Plot
+//-----------------------------------------------------------------------------{
+plot(showEMA ? ema_slow : na, 'EMA 50', color=color.new(#5b9cf6, 40), linewidth=2)
+plot(showEMA ? ema_fast : na, 'EMA 20', color=color.new(#f5a623, 50), linewidth=1)
+
+// Session background
+bgcolor(inSession ? color.new(#5b9cf6, 97) : na)
+
+//-----------------------------------------------------------------------------}
+// Alerts
+//-----------------------------------------------------------------------------{
+alertcondition(buySignal, 'BUY Signal', 'STX Edge: BUY on {{ticker}} at {{close}}')
+alertcondition(sellSignal, 'SELL Signal', 'STX Edge: SELL on {{ticker}} at {{close}}')
+alertcondition(buySignal or sellSignal, 'Any Signal', 'STX Edge: Signal on {{ticker}} at {{close}}')
+alertcondition(tpHit, 'TP Hit', 'STX Edge: TP hit on {{ticker}}')
+alertcondition(slHit, 'SL Hit', 'STX Edge: SL hit on {{ticker}}')
+
+//-----------------------------------------------------------------------------}
