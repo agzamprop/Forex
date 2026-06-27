@@ -355,8 +355,8 @@ bgcolor(finalTrend == 1 ? color.new(colBull, 97) : finalTrend == -1 ? color.new(
 //-----------------------------------------------------------------------------}
 // Alerts
 //-----------------------------------------------------------------------------{
-alertcondition(buySignal, 'BUY Signal', 'STX Edge: BUY Signal on {{ticker}} at {{close}}. SL: {{close}} - $' + str.tostring(slPips) + ' | TP: {{close}} + $' + str.tostring(tpPips))
-alertcondition(sellSignal, 'SELL Signal', 'STX Edge: SELL Signal on {{ticker}} at {{close}}. SL: {{close}} + $' + str.tostring(slPips) + ' | TP: {{close}} - $' + str.tostring(tpPips))
+alertcondition(buySignal, 'BUY Signal', 'STX Edge: BUY Signal on {{ticker}} at {{close}}')
+alertcondition(sellSignal, 'SELL Signal', 'STX Edge: SELL Signal on {{ticker}} at {{close}}')
 alertcondition(buySignal or sellSignal, 'Any Signal', 'STX Edge: Signal on {{ticker}} at {{close}}')
 
 //-----------------------------------------------------------------------------}
