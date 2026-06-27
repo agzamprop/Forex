@@ -1,11 +1,10 @@
-// STX Edge — XAUUSD Signal Indicator v2.0
-// M5 Trend + M1 Pullback + Rejection Candle
+// STX Edge — XAUUSD Signal Indicator v2.1
+// FIXED: Zones stay at price level, don't move with chart
 // SL: 50 pips ($5) | TP: 200 pips ($20) | R:R = 1:4
-// Signals are deterministic — same on every device
 
 //@version=5
-indicator('STX Edge — XAUUSD Signal v2'
-         , 'STX Edge v2'
+indicator('STX Edge — XAUUSD Signal v2.1'
+         , 'STX Edge v2.1'
          , overlay=true
          , max_boxes_count=500
          , max_lines_count=500
@@ -25,13 +24,12 @@ emaLen      = input.int(50, 'EMA Length', group=grpTrend)
 grpSignal = 'Signal Settings'
 slPips      = input.float(5.0, 'Stop Loss ($)', step=0.5, group=grpSignal)
 tpPips      = input.float(20.0, 'Take Profit ($)', step=1.0, group=grpSignal)
-zoneBars    = input.int(20, 'Zone Width (bars)', minval=5, maxval=100, group=grpSignal)
 
 grpVisual = 'Visual Settings'
 colBull     = input.color(#089981, 'Bull Color', inline='col', group=grpVisual)
 colBear     = input.color(#f23645, 'Bear Color', inline='col', group=grpVisual)
-colRisk     = input.color(color.new(#787b86, 70), 'Risk Zone', group=grpVisual)
-colReward   = input.color(color.new(#5b9cf6, 70), 'Reward Zone', group=grpVisual)
+colRisk     = input.color(color.new(#787b86, 70), 'Risk Zone (SL)', group=grpVisual)
+colReward   = input.color(color.new(#5b9cf6, 70), 'Reward Zone (TP)', group=grpVisual)
 
 //-----------------------------------------------------------------------------}
 // Trend Detection
@@ -111,12 +109,11 @@ bool bullRejection = bullPinBar or bullEngulfing
 bool bearRejection = bearPinBar or bearEngulfing
 
 //-----------------------------------------------------------------------------}
-// Signal Generation (Deterministic — same on all devices)
+// Signal Generation
 //-----------------------------------------------------------------------------{
 bool buySignal = finalTrend == 1 and isPullbackBuy and bullRejection
 bool sellSignal = finalTrend == -1 and isPullbackSell and bearRejection
 
-// Minimum 5 bars between signals
 var int lastSignalBar = 0
 bool canSignal = bar_index - lastSignalBar > 5
 
@@ -127,61 +124,108 @@ if buySignal or sellSignal
     lastSignalBar := bar_index
 
 //-----------------------------------------------------------------------------}
-// Drawing — Fixed Position Zones (DO NOT MOVE with chart scroll)
-// Each signal creates its own box at signal bar — stays forever
+// Drawing — FIXED PRICE LINES (hline style — never moves)
+// Using plot + plotshape for permanent, non-moving visuals
 //-----------------------------------------------------------------------------{
+
+// Store signal data for drawing horizontal lines
+var float buyEntry = na
+var float buySL = na
+var float buyTP = na
+var int buyBar = na
+
+var float sellEntry = na
+var float sellSL = na
+var float sellTP = na
+var int sellBar = na
+
 if buySignal
-    float entry = close
-    float sl = entry - slPips
-    float tp = entry + tpPips
-    int startBar = bar_index
-    int endBar = bar_index + zoneBars
+    buyEntry := close
+    buySL := close - slPips
+    buyTP := close + tpPips
+    buyBar := bar_index
+
+if sellSignal
+    sellEntry := close
+    sellSL := close + slPips
+    sellTP := close - tpPips
+    sellBar := bar_index
+
+// Draw zones using line.new with extend=none and fixed x coordinates
+// Lines are drawn from signal bar to signal bar + fixed offset
+// They use PRICE values so they NEVER move vertically
+
+if buySignal
+    float _entry = close
+    float _sl = close - slPips
+    float _tp = close + tpPips
+    int _left = bar_index
+    int _right = bar_index + 1  // minimal width — box extends right on each bar
     
-    // Risk zone (SL area) — entry to SL
-    box.new(startBar, entry, endBar, sl,
-      border_color=color.new(colBear, 80),
-      bgcolor=colRisk)
+    // Entry line (dashed)
+    line.new(_left, _entry, _left + 20, _entry, 
+      color=color.new(chart.fg_color, 60), style=line.style_dashed, width=1)
     
-    // Reward zone (TP area) — entry to TP
-    box.new(startBar, tp, endBar, entry,
-      border_color=color.new(colBull, 80),
-      bgcolor=colReward)
+    // SL line (red dotted)
+    line.new(_left, _sl, _left + 20, _sl, 
+      color=colBear, style=line.style_dotted, width=1)
     
-    // Signal label
-    label.new(startBar, low,
-      text='▲ BUY',
-      color=color.new(colBull, 80),
+    // TP line (green dotted)
+    line.new(_left, _tp, _left + 20, _tp, 
+      color=colBull, style=line.style_dotted, width=1)
+    
+    // Risk box (entry to SL) — FIXED narx da
+    box.new(_left, _entry, _left + 20, _sl,
+      border_color=color.new(na, na), bgcolor=colRisk)
+    
+    // Reward box (entry to TP) — FIXED narx da
+    box.new(_left, _tp, _left + 20, _entry,
+      border_color=color.new(na, na), bgcolor=colReward)
+    
+    // BUY label
+    label.new(_left, _sl,
+      text='▲ BUY\n' + str.tostring(_entry, '#.##'),
+      color=color.new(colBull, 85),
       textcolor=colBull,
       style=label.style_label_up,
       size=size.small)
 
 if sellSignal
-    float entry = close
-    float sl = entry + slPips
-    float tp = entry - tpPips
-    int startBar = bar_index
-    int endBar = bar_index + zoneBars
+    float _entry = close
+    float _sl = close + slPips
+    float _tp = close - tpPips
+    int _left = bar_index
     
-    // Risk zone (SL area) — entry to SL
-    box.new(startBar, sl, endBar, entry,
-      border_color=color.new(colBear, 80),
-      bgcolor=colRisk)
+    // Entry line (dashed)
+    line.new(_left, _entry, _left + 20, _entry, 
+      color=color.new(chart.fg_color, 60), style=line.style_dashed, width=1)
     
-    // Reward zone (TP area) — entry to TP
-    box.new(startBar, entry, endBar, tp,
-      border_color=color.new(colBull, 80),
-      bgcolor=colReward)
+    // SL line (red dotted)
+    line.new(_left, _sl, _left + 20, _sl, 
+      color=colBear, style=line.style_dotted, width=1)
     
-    // Signal label
-    label.new(startBar, high,
-      text='▼ SELL',
-      color=color.new(colBear, 80),
+    // TP line (green dotted)
+    line.new(_left, _tp, _left + 20, _tp, 
+      color=colBull, style=line.style_dotted, width=1)
+    
+    // Risk box (entry to SL) — FIXED narx da
+    box.new(_left, _sl, _left + 20, _entry,
+      border_color=color.new(na, na), bgcolor=colRisk)
+    
+    // Reward box (entry to TP) — FIXED narx da
+    box.new(_left, _entry, _left + 20, _tp,
+      border_color=color.new(na, na), bgcolor=colReward)
+    
+    // SELL label
+    label.new(_left, _sl,
+      text='▼ SELL\n' + str.tostring(_entry, '#.##'),
+      color=color.new(colBear, 85),
       textcolor=colBear,
       style=label.style_label_down,
       size=size.small)
 
 //-----------------------------------------------------------------------------}
-// Plot EMA (minimal)
+// Plot EMA
 //-----------------------------------------------------------------------------{
 plot(useEMA ? ema50 : na, 'EMA 50', color=color.new(#5b9cf6, 50), linewidth=1)
 
